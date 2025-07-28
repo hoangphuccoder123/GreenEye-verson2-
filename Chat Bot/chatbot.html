@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green ChatBot - Tư vấn rác thải</title>
+    <link rel="icon" type="image/png" href="https://cdn.pixabay.com/photo/2013/07/13/14/08/eye-162183_1280.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --primary-light: #43A047;
+            --primary-dark: #1B5E20;
+            --accent-color: #66BB6A;
+            --background: linear-gradient(135deg, #E8F5E8 0%, #F1F8E9 50%, #C8E6C9 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #2C3E50;
+            --text-light: #546E7A;
+            --border-radius: 20px;
+            --shadow: 0 8px 32px rgba(46, 125, 50, 0.15);
+            --message-user: linear-gradient(135deg, #43A047, #66BB6A);
+            --message-bot: linear-gradient(135deg, #F8F9FA, #FFFFFF);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(102, 187, 106, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(46, 125, 50, 0.08) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            height: calc(100vh - 2rem);
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow-y: auto;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid rgba(102, 187, 106, 0.2);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .features {
+            margin-bottom: 2rem;
+        }
+
+        .features h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: rgba(102, 187, 106, 0.08);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(102, 187, 106, 0.15);
+            transform: translateX(5px);
+        }
+
+        .feature-item i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .feature-item span {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .quick-actions {
+            margin-top: 2rem;
+        }
+
+        .quick-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .quick-btn:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .chat-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .chat-status {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: 
+                radial-gradient(circle at top right, rgba(102, 187, 106, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at bottom left, rgba(46, 125, 50, 0.03) 0%, transparent 50%);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--message-user);
+            color: white;
+        }
+
+        .message.bot .message-avatar {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 1.2rem 1.5rem;
+            border-radius: 20px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: var(--message-user);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: var(--message-bot);
+            color: var(--text-dark);
+            border: 1px solid rgba(102, 187, 106, 0.2);
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-content h4 {
+            color: var(--primary-dark);
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .message-content ul {
+            margin: 0.8rem 0;
+            padding-left: 1.2rem;
+        }
+
+        .message-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .message-content strong {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .message-content em {
+            color: var(--primary-color);
+            font-style: italic;
+        }
+
+        .message-content code {
+            background: rgba(102, 187, 106, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content h3 {
+            color: var(--primary-dark);
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .message-content h4 {
+            color: var(--primary-dark);
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: var(--message-bot);
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(102, 187, 106, 0.2);
+            max-width: 70%;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .chat-input {
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-top: 1px solid rgba(102, 187, 106, 0.2);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(102, 187, 106, 0.3);
+            border-radius: 25px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        #sendBtn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sendBtn:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-color));
+            transform: scale(1.05);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: 100vh;
+                gap: 0;
+                padding: 0;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .chat-container {
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #f44336, #e57373);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h2 class="logo-title">Green ChatBot</h2>
+                <p class="logo-subtitle">Trợ lý AI thông minh tư vấn về luật rác thải và phân loại rác</p>
+            </div>
+
+            <div class="features">
+                <h3><i class="fas fa-star"></i> Tính năng</h3>
+                <div class="feature-item">
+                    <i class="fas fa-balance-scale"></i>
+                    <span>Tư vấn luật rác thải</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-recycle"></i>
+                    <span>Hướng dẫn phân loại rác</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-leaf"></i>
+                    <span>Giải pháp thân thiện môi trường</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Tư vấn xử lý rác tại nhà</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Thông tin điểm thu gom</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3><i class="fas fa-bolt"></i> Câu hỏi nhanh</h3>
+                <button class="quick-btn" onclick="sendQuickQuestion('Làm thế nào để phân loại rác đúng cách?')">
+                    <i class="fas fa-sort-amount-up"></i>
+                    Cách phân loại rác
+                </button>
+                <button class="quick-btn" onclick="sendQuickQuestion('Luật rác thải Việt Nam quy định gì?')">
+                    <i class="fas fa-gavel"></i>
+                    Luật rác thải VN
+                </button>
+                <button class="quick-btn" onclick="sendQuickQuestion('Tôi nên xử lý rác thải nhà bếp như thế nào?')">
+                    <i class="fas fa-utensils"></i>
+                    Xử lý rác nhà bếp
+                </button>
+                <button class="quick-btn" onclick="sendQuickQuestion('Làm thế nào để giảm thiểu rác thải?')">
+                    <i class="fas fa-reduce"></i>
+                    Giảm thiểu rác thải
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-info">
+                    <div class="chat-title">Green AI Assistant</div>
+                    <div class="chat-status">
+                        <div class="status-dot"></div>
+                        Đang hoạt động • Hỗ trợ 24/7
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3 class="welcome-title">Chào mừng đến với Green ChatBot!</h3>
+                    <p class="welcome-text">
+                        Tôi là trợ lý AI chuyên tư vấn về luật rác thải và hướng dẫn phân loại rác. 
+                        Hãy đặt câu hỏi để được hỗ trợ tốt nhất!
+                    </p>
+                </div>
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="Nhập câu hỏi về rác thải, phân loại rác hoặc luật môi trường..."
+                            rows="1"
+                        ></textarea>
+                    </div>
+                    <button id="sendBtn" type="button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gemini AI Configuration
+        const GEMINI_API_KEY = 'AIzaSyCmAa6vYJKD6hesdby9fUwgB-yKCbPDOYI';
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // WASTE CLASSIFICATION DATABASE - Tích hợp dữ liệu phân loại rác
+        const trashClassificationData = {
+            trashCategories: {
+                organic: {
+                    name: "Rác hữu cơ",
+                    description: "Rác có nguồn gốc từ thực vật, động vật, có thể phân hủy sinh học",
+                    color: "#4CAF50",
+                    icon: "🍃",
+                    binColor: "Thùng xanh lá",
+                    examples: [
+                        "Vỏ trái cây (chuối, cam, táo, xoài)",
+                        "Thức ăn thừa (cơm, thịt, cá, rau củ)",
+                        "Lá cây, cành cây nhỏ",
+                        "Vỏ trứng",
+                        "Bã cà phê, trà",
+                        "Xương cá, xương gà nhỏ",
+                        "Hoa héo, lá khô",
+                        "Rau củ hỏng",
+                        "Bánh mì cũ",
+                        "Phân động vật"
+                    ],
+                    processingTime: "2-6 tháng",
+                    benefits: [
+                        "Tạo phân compost tự nhiên",
+                        "Cải thiện độ màu mỡ đất",
+                        "Giảm khí thải nhà kính",
+                        "Tiết kiệm chi phí xử lý rác"
+                    ],
+                    processing: {
+                        method: "Ủ phân compost",
+                        steps: [
+                            "Cho rác hữu cơ vào thùng/hố ủ phân",
+                            "Trộn với lá khô theo tỷ lệ 3:1",
+                            "Tưới nước vừa đủ để giữ ẩm",
+                            "Trở đều 1-2 tuần/lần",
+                            "Thu hoạch compost sau 2-6 tháng"
+                        ],
+                        tips: [
+                            "Cắt nhỏ rác hữu cơ để ủ nhanh hơn",
+                            "Tránh thịt cá để không thu hút ruồi muỗi",
+                            "Kiểm soát độ ẩm 50-60%",
+                            "Nhiệt độ ủ lý tưởng 50-65°C"
+                        ]
+                    }
+                },
+                recyclable: {
+                    name: "Rác tái chế",
+                    description: "Rác có thể tái chế thành sản phẩm mới",
+                    color: "#2196F3",
+                    icon: "♻️",
+                    binColor: "Thùng xanh dương",
+                    subcategories: {
+                        plastic: {
+                            name: "Nhựa",
+                            examples: ["Chai nước suối", "Chai nước ngọt", "Hộp đựng thực phẩm", "Túi nhựa dày"],
+                            codes: ["PET (1)", "HDPE (2)", "PP (5)"],
+                            note: "Rửa sạch trước khi tái chế"
+                        },
+                        paper: {
+                            name: "Giấy",
+                            examples: ["Báo cũ", "Tạp chí", "Giấy văn phòng", "Hộp carton", "Túi giấy"],
+                            excluded: ["Giấy bóng", "Giấy ảnh", "Giấy dính băng keo", "Giấy ướt"]
+                        },
+                        metal: {
+                            name: "Kim loại",
+                            examples: ["Lon nhôm", "Lon thiếc", "Dây điện cũ", "Nồi chảo cũ"],
+                            note: "Giá trị tái chế cao"
+                        },
+                        glass: {
+                            name: "Thủy tinh",
+                            examples: ["Chai lọ thủy tinh", "Cốc thủy tinh", "Bóng đèn sợi đốt"],
+                            excluded: ["Thủy tinh cường lực", "Đèn huỳnh quang"]
+                        }
+                    },
+                    processing: {
+                        preparation: [
+                            "Rửa sạch bao bì trước khi bỏ",
+                            "Tháo nắp, nhãn dán nếu có thể",
+                            "Phân loại theo chất liệu",
+                            "Để khô trước khi thu gom"
+                        ]
+                    }
+                },
+                hazardous: {
+                    name: "Rác độc hại",
+                    description: "Rác chứa chất độc hại, cần xử lý đặc biệt",
+                    color: "#F44336",
+                    icon: "☠️",
+                    binColor: "Thùng đỏ",
+                    examples: [
+                        "Pin, ắc quy",
+                        "Đèn huỳnh quang, đèn compact",
+                        "Thuốc trừ sâu, hóa chất",
+                        "Sơn, keo dán",
+                        "Dung môi, axit",
+                        "Nhiệt kế thủy ngân",
+                        "Thiết bị điện tử (TV, máy tính)",
+                        "Thuốc hết hạn",
+                        "X-quang phim",
+                        "Lốp xe cũ"
+                    ],
+                    dangers: [
+                        "Gây ô nhiễm đất, nước",
+                        "Độc hại với sức khỏe",
+                        "Gây cháy nổ",
+                        "Ảnh hưởng hệ sinh thái"
+                    ],
+                    processing: {
+                        handling: [
+                            "Đeo găng tay, khẩu trang khi xử lý",
+                            "Bọc kỹ, dán nhãn cảnh báo",
+                            "Bảo quản nơi khô ráo, thoáng mát",
+                            "Không được vứt chung với rác thường"
+                        ],
+                        disposal: [
+                            "Liên hệ đơn vị thu gom chuyên biệt",
+                            "Mang đến điểm thu gom của chính quyền",
+                            "Sử dụng dịch vụ thu gom nguy hại",
+                            "Xử lý tại cơ sở có giấy phép"
+                        ]
+                    }
+                },
+                nonRecyclable: {
+                    name: "Rác không tái chế",
+                    description: "Rác không thể tái chế, cần xử lý bằng cách khác",
+                    color: "#9E9E9E",
+                    icon: "🗑️",
+                    binColor: "Thùng xám/đen",
+                    examples: [
+                        "Tã lót trẻ em",
+                        "Băng vệ sinh",
+                        "Bao cao su",
+                        "Bóng bay cao su",
+                        "Kính cường lực",
+                        "Gương soi",
+                        "Bóng đèn LED hỏng",
+                        "Ceramic, sứ",
+                        "Giấy carbon",
+                        "Băng keo trong"
+                    ]
+                }
+            },
+            
+            // Luật và quy định mới nhất 2025
+            laws: {
+                vietnam: {
+                    lawName: "Luật Bảo vệ môi trường 2020 & Các quy định mới 2025",
+                    keyPoints: [
+                        "Phân loại rác tại nguồn BẮT BUỘC từ 01/01/2025 trên toàn quốc",
+                        "Phạt tiền từ 1.000.000 - 2.000.000 VNĐ cho cá nhân không phân loại (tăng từ 2025)",
+                        "Phạt từ 20-50 triệu VNĐ cho doanh nghiệp vi phạm (tăng mạnh từ 2025)",
+                        "Cấm hoàn toàn túi nilon khó phân hủy từ 01/07/2025",
+                        "Bắt buộc sử dụng bao bì tái chế cho hàng tiêu dùng từ 2025",
+                        "Tăng thuế môi trường đối với sản phẩm nhựa không tái chế được",
+                        "Khuyến khích giảm thiểu rác thải nhựa với ưu đãi thuế"
+                    ],
+                    requirements: [
+                        "Phân loại tối thiểu 4 loại: hữu cơ, tái chế, độc hại, không tái chế",
+                        "Sử dụng túi/thùng màu chuẩn quốc gia theo QĐ 15/2025/QĐ-TTg",
+                        "Thu gom riêng biệt theo lịch cố định",
+                        "Giáo dục bắt buộc về phân loại rác trong trường học",
+                        "Ứng dụng QR Code để theo dõi nguồn gốc rác thải",
+                        "Báo cáo định kỳ lượng rác thải cho cơ quan quản lý"
+                    ],
+                    newRegulations2025: {
+                        circular01_2025: {
+                            name: "Thông tư 01/2025/TT-MONRE",
+                            content: "Quy định chi tiết về phân loại rác thải sinh hoạt tại nguồn",
+                            effectiveDate: "01/01/2025",
+                            keyFeatures: [
+                                "Màu sắc thùng rác chuẩn hóa toàn quốc",
+                                "Quy trình thu gom và vận chuyển",
+                                "Tiêu chuẩn xử lý từng loại rác",
+                                "Hệ thống theo dõi bằng công nghệ số"
+                            ]
+                        },
+                        decision15_2025: {
+                            name: "Quyết định 15/2025/QĐ-TTg",
+                            content: "Về việc thực hiện phân loại rác thải tại nguồn",
+                            effectiveDate: "01/01/2025",
+                            binColorStandard: {
+                                organic: "Xanh lá cây (#4CAF50)",
+                                recyclable: "Xanh dương (#2196F3)", 
+                                hazardous: "Đỏ (#F44336)",
+                                nonRecyclable: "Đen (#424242)"
+                            },
+                            fines2025: {
+                                individual: {
+                                    firstViolation: "1.000.000 - 2.000.000 VNĐ",
+                                    repeatViolation: "2.000.000 - 5.000.000 VNĐ",
+                                    seriousViolation: "5.000.000 - 10.000.000 VNĐ"
+                                },
+                                business: {
+                                    smallBusiness: "20.000.000 - 50.000.000 VNĐ",
+                                    mediumBusiness: "50.000.000 - 100.000.000 VNĐ",
+                                    largeBusiness: "100.000.000 - 200.000.000 VNĐ"
+                                },
+                                additional: [
+                                    "Tạm dừng hoạt động kinh doanh 1-3 tháng",
+                                    "Thu hồi giấy phép môi trường",
+                                    "Công khai danh sách vi phạm",
+                                    "Bồi thường thiệt hại môi trường"
+                                ]
+                            }
+                        },
+                        plasticBan2025: {
+                            name: "Nghị định 08/2025/NĐ-CP",
+                            content: "Cấm sản xuất, nhập khẩu và sử dụng một số sản phẩm nhựa",
+                            effectiveDate: "01/07/2025",
+                            bannedItems: [
+                                "Túi nilon mỏng dưới 50 micron",
+                                "Ống hút nhựa một lần",
+                                "Đồ dùng nhựa một lần tại nhà hàng",
+                                "Bao bì styrofoam cho thực phẩm",
+                                "Chai nhựa không có thông tin tái chế"
+                            ],
+                            alternatives: [
+                                "Túi vải, túi giấy tái chế",
+                                "Ống hút tre, inox, giấy",
+                                "Đồ dùng gỗ, tre, tái chế",
+                                "Hộp giấy, lá chuối",
+                                "Chai thủy tinh, kim loại"
+                            ]
+                        }
+                    },
+                    incentives2025: {
+                        taxReduction: [
+                            "Giảm 10% thuế TNDN cho doanh nghiệp tái chế",
+                            "Miễn thuế nhập khẩu thiết bị xử lý rác",
+                            "Ưu đãi thuế đất cho nhà máy xử lý rác"
+                        ],
+                        subsidies: [
+                            "Hỗ trợ 50% chi phí mua thùng rác phân loại",
+                            "Thưởng 500.000 VNĐ/hộ gia đình thực hiện tốt",
+                            "Miễn phí thu gom rác cho khu vực thực hiện đúng"
+                        ],
+                        greenProjects: [
+                            "Ưu tiên vốn vay ưu đãi cho dự án xanh",
+                            "Hỗ trợ 70% kinh phí nghiên cứu công nghệ xử lý rác",
+                            "Thưởng cho các sáng kiến giảm thiểu rác thải"
+                        ]
+                    }
+                },
+                international: {
+                    globalTrends2025: [
+                        "EU: Tỷ lệ tái chế bao bì đạt 70% từ 2025",
+                        "Nhật Bản: Zero Waste trong 500 thành phố",
+                        "Singapore: Cấm hoàn toàn nhựa một lần từ 2025",
+                        "Hàn Quốc: AI phân loại rác tự động 100%",
+                        "Thái Lan: Thu phí túi nilon 5 Baht/chiếc"
+                    ]
+                }
+            },
+            
+            // Nguyên tắc 3R
+            principles3R: {
+                reduce: {
+                    name: "Giảm thiểu (Reduce)",
+                    priority: 1,
+                    actions: [
+                        "Mua sắm có kế hoạch, tránh dư thừa",
+                        "Chọn sản phẩm có bao bì tối giản",
+                        "Sử dụng túi vải thay túi nilon",
+                        "In hai mặt giấy",
+                        "Tắt điện khi không dùng",
+                        "Sử dụng cốc, đũa cá nhân",
+                        "Mua sản phẩm có độ bền cao"
+                    ]
+                },
+                reuse: {
+                    name: "Tái sử dụng (Reuse)",
+                    priority: 2,
+                    actions: [
+                        "Tái sử dụng chai lọ làm chậu trồng cây",
+                        "Dùng mặt sau của giấy đã in",
+                        "Biến hộp carton thành đồ chơi",
+                        "Sửa chữa đồ đạc thay vì vứt bỏ",
+                        "Tặng, bán đồ cũ còn dùng được",
+                        "Dùng túi nilon nhiều lần",
+                        "Tận dụng vỏ hộp làm hộp đựng"
+                    ]
+                },
+                recycle: {
+                    name: "Tái chế (Recycle)",
+                    priority: 3,
+                    actions: [
+                        "Phân loại rác đúng cách",
+                        "Làm sạch bao bì trước khi tái chế",
+                        "Tham gia chương trình thu gom tái chế",
+                        "Ủng hộ sản phẩm từ vật liệu tái chế",
+                        "Giáo dục người khác về tái chế"
+                    ]
+                }
+            },
+            
+            // Thống kê cập nhật 2025
+            statistics: {
+                vietnam: {
+                    totalWaste: "31.2 triệu tấn/năm (2024)",
+                    wastePerCapita: "0.92 kg/người/ngày (tăng 9.5% so với 2020)",
+                    recyclingRate: "12-15% (tăng đáng kể từ khi có luật mới)",
+                    organicWaste: "62% (giảm nhẹ do thay đổi lối sống)",
+                    plasticWaste: "12-15% (tăng do phát triển kinh tế)",
+                    paperWaste: "6-8%",
+                    newStatistics2025: {
+                        sortingCompliance: "68% hộ gia đình thực hiện phân loại",
+                        cityImplementation: "85% thành phố đã triển khai",
+                        businessCompliance: "45% doanh nghiệp tuân thủ đầy đủ",
+                        wasteReduction: "8% giảm lượng rác so với 2023",
+                        composting: "25% rác hữu cơ được ủ phân",
+                        plasticReduction: "15% giảm túi nilon sử dụng",
+                        digitalTracking: "30% khu vực sử dụng QR Code theo dõi"
+                    },
+                    projections2025: {
+                        recyclingTarget: "20% vào cuối 2025",
+                        wasteReductionTarget: "15% giảm so với 2024",
+                        sortingTarget: "90% hộ gia đình phân loại",
+                        businessTarget: "80% doanh nghiệp tuân thủ"
+                    }
+                },
+                global: {
+                    totalWaste: "2.15 tỷ tấn/năm (2024)",
+                    projection2050: "3.2 tỷ tấn/năm (giảm nhờ công nghệ mới)",
+                    topRecyclers2025: [
+                        "Đức (72% - dẫn đầu thế giới)",
+                        "Áo (68%)",
+                        "Hàn Quốc (65% - tăng mạnh nhờ AI)",
+                        "Nhật Bản (64% - Zero Waste cities)",
+                        "Wales (58%)",
+                        "Thụy Sĩ (55%)",
+                        "Việt Nam (15% - vào top 50 thế giới)"
+                    ],
+                    trends2025: [
+                        "AI và robotics chiếm 40% quy trình phân loại",
+                        "Blockchain theo dõi 25% chuỗi cung ứng rác thải",
+                        "60+ quốc gia cấm nhựa một lần",
+                        "Kinh tế tuần hoàn tăng 25% GDP toàn cầu"
+                    ]
+                }
+            },
+            
+            // Mẹo thực tế cập nhật 2025
+            practicalTips: {
+                kitchen: [
+                    "Đặt 4 thùng rác nhỏ theo chuẩn màu QĐ 15/2025",
+                    "Dùng túi giấy hoặc túi sinh học cho rác hữu cơ",
+                    "Rửa sạch và để khô bao bì trước khi tái chế",
+                    "Tách nắp chai ra khỏi thân chai (theo quy định mới)",
+                    "Không bỏ dầu mỡ xuống bồn rửa - thu gom riêng",
+                    "Sử dụng ứng dụng QR Code để scan bao bì tái chế",
+                    "Tích lũy điểm thưởng khi phân loại đúng cách"
+                ],
+                bathroom: [
+                    "Ống thuốc đánh răng - cắt đôi, rửa sạch vào thùng tái chế",
+                    "Chai shampoo - gỡ nhãn, rửa sạch vào thùng xanh dương",
+                    "Bao bì mỹ phẩm - phân loại theo mã số tái chế",
+                    "Bông tăm, bông gòn - vào thùng đen (không tái chế)",
+                    "Thuốc hết hạn - mang đến nhà thuốc có điểm thu gom",
+                    "Bàn chải đánh răng điện - vào thùng đỏ (rác độc hại)"
+                ],
+                office: [
+                    "Hộp mực in - giao lại nhà cung cấp (có thưởng từ 2025)",
+                    "Giấy in một mặt - dùng làm giấy nháp hoặc vào thùng tái chế",
+                    "Pin cũ - thu gom tại các điểm siêu thị, có thưởng",
+                    "Thiết bị điện tử - liên hệ hotline 1900-1234 để thu gom",
+                    "Sử dụng cốc sứ thay cốc giấy (theo quy định mới)",
+                    "In hai mặt giấy để giảm 50% rác giấy"
+                ],
+                new2025: [
+                    "Tải app 'Green Vietnam' để scan mã QR trên bao bì",
+                    "Tham gia chương trình 'Xanh điểm - Đổi quà' của chính phủ",
+                    "Sử dụng túi vải có chip RFID để tích điểm tự động",
+                    "Theo dõi carbon footprint cá nhân qua app",
+                    "Tham gia group Facebook 'Zero Waste Vietnam' chia sẻ kinh nghiệm",
+                    "Đăng ký nhận thông báo lịch thu gom qua Zalo"
+                ]
+            },
+        };
+
+        // Hàm tiện ích để nhận diện loại rác từ tin nhắn
+        function identifyWasteFromMessage(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            for (const [categoryKey, categoryData] of Object.entries(trashClassificationData.trashCategories)) {
+                if (categoryData.examples) {
+                    for (const example of categoryData.examples) {
+                        if (example.toLowerCase().includes(lowerMessage) || 
+                            lowerMessage.includes(example.toLowerCase().split('(')[0].trim())) {
+                            return {
+                                category: categoryKey,
+                                name: categoryData.name,
+                                color: categoryData.color,
+                                icon: categoryData.icon,
+                                binColor: categoryData.binColor,
+                                description: categoryData.description,
+                                example: example
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Hàm lấy thông tin xử lý dựa trên loại rác
+        function getProcessingInfo(category) {
+            const categoryData = trashClassificationData.trashCategories[category];
+            return categoryData?.processing || null;
+        }
+
+        // Hàm cập nhật welcome message với thông tin database
+        function updateWelcomeMessage() {
+            const welcomeText = document.querySelector('.welcome-text');
+            if (welcomeText && trashClassificationData) {
+                const totalCategories = Object.keys(trashClassificationData.trashCategories).length;
+                const totalExamples = Object.values(trashClassificationData.trashCategories)
+                    .reduce((sum, cat) => sum + (cat.examples?.length || 0), 0);
+                
+                welcomeText.innerHTML = `
+                    Tôi là trợ lý AI chuyên tư vấn về luật rác thải và hướng dẫn phân loại rác.<br>
+                    <strong>📊 Cơ sở dữ liệu:</strong> ${totalCategories} loại rác chính, ${totalExamples} sản phẩm cụ thể<br>
+                    <strong>🎯 Độ chính xác:</strong> Nhận diện thông minh + AI Gemini<br>
+                    Hãy đặt câu hỏi để được hỗ trợ tốt nhất!
+                `;
+            }
+        }
+
+        // System prompt với dữ liệu tích hợp
+        const SYSTEM_PROMPT = `Bạn là Green AI Assistant - một chuyên gia tư vấn về luật rác thải và phân loại rác thải tại Việt Nam với cơ sở dữ liệu đầy đủ.
+
+        CƠ SỞ DỮ LIỆU CỦA BẠN:
+        Bạn có quyền truy cập vào cơ sở dữ liệu chi tiết với ${Object.keys(trashClassificationData.trashCategories).length} loại rác chính:
+        ${Object.entries(trashClassificationData.trashCategories).map(([key, data]) => 
+            `- ${data.name} ${data.icon} (${data.binColor}): ${data.examples?.length || 0} sản phẩm`
+        ).join('\n')}
+
+        THÔNG TIN MỚI NHẤT 2025:
+        - Luật Bảo vệ môi trường 2020 & Các quy định mới 2025 đã có hiệu lực
+        - Phân loại rác BẮT BUỘC từ 01/01/2025 trên toàn quốc
+        - Mức phạt tăng mạnh: Cá nhân 1-2 triệu VNĐ, Doanh nghiệp 20-50 triệu VNĐ
+        - Cấm hoàn toàn túi nilon khó phân hủy từ 01/07/2025
+        - Tỷ lệ tái chế VN hiện tại: ${trashClassificationData.statistics.vietnam.recyclingRate}
+        - Mục tiêu 2025: 20% tỷ lệ tái chế, 90% hộ gia đình phân loại
+        - Màu thùng rác chuẩn quốc gia theo QĐ 15/2025/QĐ-TTg
+        - Hệ thống QR Code và ứng dụng số hỗ trợ phân loại
+
+        QUY ĐỊNH MỚI QUAN TRỌNG:
+        - Thông tư 01/2025/TT-MONRE: Quy định chi tiết phân loại rác tại nguồn
+        - Quyết định 15/2025/QĐ-TTg: Màu sắc thùng rác chuẩn hóa
+        - Nghị định 08/2025/NĐ-CP: Cấm các sản phẩm nhựa một lần
+        - Ưu đãi thuế và hỗ trợ cho các hộ gia đình thực hiện tốt
+
+        NHIỆM VỤ CỦA BẠN:
+        1. Tư vấn về các quy định pháp luật MỚI NHẤT 2025
+        2. Hướng dẫn chi tiết cách phân loại rác theo chuẩn mới
+        3. Đưa ra giải pháp xử lý rác thải thân thiện môi trường
+        4. Tư vấn về mức phạt và ưu đãi mới 2025
+        5. Hướng dẫn sử dụng công nghệ số hỗ trợ phân loại
+        6. Nhận diện và phân loại rác từ mô tả của người dùng
+
+        CÁCH SỬ DỤNG DATABASE:
+        - Luôn cập nhật thông tin mới nhất 2025
+        - Sử dụng màu thùng rác theo QĐ 15/2025
+        - Đề cập đến mức phạt mới và ưu đãi
+        - Hướng dẫn sử dụng app và công nghệ số
+        - Trích dẫn luật pháp từ laws
+        - Sử dụng thống kê từ statistics để làm rõ tầm quan trọng
+
+        CÁCH TRÌNH BÀY QUAN TRỌNG:
+        - Sử dụng markdown format: **text** cho chữ đậm, *text* cho chữ nghiêng
+        - Sử dụng ## cho tiêu đề chính, ### cho tiêu đề phụ
+        - Sử dụng - hoặc * để tạo danh sách có dấu chấm
+        - Sử dụng 1. 2. 3. để tạo danh sách có số
+        - Chia thông tin thành các mục rõ ràng với tiêu đề
+        - Đưa ra ví dụ cụ thể từ database
+        - Sử dụng emoji từ database: � ♻️ ☠️ 🗑️ và thêm: 📋 ⚖️ 🏠 🌍
+        - Luôn đưa ra lời khuyên thực tế từ practicalTips
+        - Kết thúc với câu hỏi để tiếp tục cuộc trò chuyện
+
+        TEMPLATE TRẢ LỜI MẪU:
+        ## [Tiêu đề] [Emoji phù hợp] (Cập nhật 2025)
+
+        **🎯 Phân loại:** [Loại rác từ database]
+        **📦 Thùng rác:** [Màu thùng theo QĐ 15/2025]
+        **⚖️ Quy định mới:** [Luật/quy định áp dụng từ 2025]
+
+        **Ví dụ cụ thể:**
+        - [Ví dụ từ examples]
+        - [Ví dụ từ examples]
+
+        **📋 Cách xử lý (theo quy định 2025):**
+        1. [Bước từ processing]
+        2. [Bước từ processing]
+
+        **💡 Mẹo hay 2025:** [Tip từ practicalTips.new2025]
+        **💰 Ưu đãi/Phạt:** [Thông tin từ laws.incentives2025/fines]
+        **📱 Công nghệ hỗ trợ:** [App, QR Code, etc.]
+
+        HÃY TRẢ LỜI BẰNG TIẾNG VIỆT với giọng điệu thân thiện, chuyên nghiệp và dễ hiểu. Luôn cập nhật thông tin mới nhất 2025 để đảm bảo độ chính xác cao nhất.`;
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Send message on Enter (Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Send button click
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Quick question function
+        function sendQuickQuestion(question) {
+            messageInput.value = question;
+            sendMessage();
+        }
+
+        // Send message function với nhận diện thông minh
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Add user message
+            addMessage(message, 'user');
+
+            // Nhận diện loại rác từ tin nhắn
+            const identifiedWaste = identifyWasteFromMessage(message);
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Disable send button
+            sendBtn.disabled = true;
+
+            try {
+                let enhancedPrompt = SYSTEM_PROMPT;
+                
+                // Nếu nhận diện được rác, thêm thông tin cụ thể
+                if (identifiedWaste) {
+                    const processingInfo = getProcessingInfo(identifiedWaste.category);
+                    enhancedPrompt += `\n\n🎯 NHẬN DIỆN TỰ ĐỘNG:
+                    - Loại rác: ${identifiedWaste.name} ${identifiedWaste.icon}
+                    - Ví dụ phù hợp: ${identifiedWaste.example}
+                    - Thùng rác: ${identifiedWaste.binColor}
+                    - Mô tả: ${identifiedWaste.description}
+                    ${processingInfo ? `- Cách xử lý: ${JSON.stringify(processingInfo)}` : ''}
+                    
+                    Hãy sử dụng thông tin này để trả lời chi tiết và chính xác nhất cho người dùng.`;
+                }
+
+                // Call Gemini API với enhanced prompt
+                const response = await callGeminiAPI(message, enhancedPrompt);
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Add bot response
+                addMessage(response, 'bot');
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('Xin lỗi, tôi gặp sự cố kỹ thuật. Vui lòng thử lại sau. 🤖', 'bot');
+                console.error('Error:', error);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Call Gemini API với enhanced prompt
+        async function callGeminiAPI(userMessage, prompt = SYSTEM_PROMPT) {
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: `${prompt}\n\nCâu hỏi của người dùng: ${userMessage}`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 2048,
+                }
+            };
+
+            const response = await fetch(GEMINI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Invalid response from Gemini API');
+            }
+        }
+
+        // Add message to chat
+        function addMessage(content, sender) {
+            // Remove welcome message if exists
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            if (sender === 'bot') {
+                // Format bot message with HTML
+                contentDiv.innerHTML = formatBotMessage(content);
+            } else {
+                contentDiv.textContent = content;
+            }
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            contentDiv.appendChild(timeDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Format bot message with better HTML structure
+        function formatBotMessage(content) {
+            // Clean and format the content
+            let formatted = content
+                // Bold text with **
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                // Italic text with *
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                // Code with backticks
+                .replace(/`(.*?)`/g, '<code style="background: rgba(102, 187, 106, 0.1); padding: 2px 4px; border-radius: 4px; font-family: monospace;">$1</code>')
+                // Headers with ##
+                .replace(/^## (.*$)/gim, '<h4 style="color: var(--primary-dark); margin: 1rem 0 0.5rem 0; font-size: 1.1rem;"><i class="fas fa-leaf" style="margin-right: 0.5rem;"></i>$1</h4>')
+                // Headers with #
+                .replace(/^# (.*$)/gim, '<h3 style="color: var(--primary-dark); margin: 1rem 0 0.5rem 0; font-size: 1.2rem;"><i class="fas fa-star" style="margin-right: 0.5rem;"></i>$1</h3>')
+                // Lists with - or *
+                .replace(/^[-*]\s(.*)$/gim, '<li style="margin-bottom: 0.3rem; line-height: 1.5;">$1</li>')
+                // Numbers lists
+                .replace(/^\d+\.\s(.*)$/gim, '<li style="margin-bottom: 0.3rem; line-height: 1.5;">$1</li>')
+                // Convert multiple line breaks to paragraph breaks
+                .replace(/\n\n+/g, '</p><p>')
+                // Convert single line breaks to <br>
+                .replace(/\n/g, '<br>');
+
+            // Wrap lists in <ul> tags
+            formatted = formatted.replace(/(<li.*?<\/li>(\s*<br>)*)+/g, function(match) {
+                return '<ul style="margin: 0.5rem 0; padding-left: 1.5rem;">' + match.replace(/<br>/g, '') + '</ul>';
+            });
+
+            // Add paragraph wrapper if not already present
+            if (!formatted.includes('<p>') && !formatted.includes('<h3>') && !formatted.includes('<h4>')) {
+                formatted = '<p style="margin: 0; line-height: 1.6;">' + formatted + '</p>';
+            } else if (formatted.includes('<p>')) {
+                // Ensure all paragraphs have proper styling
+                formatted = '<p style="margin: 0 0 1rem 0; line-height: 1.6;">' + formatted + '</p>';
+            }
+
+            // Clean up empty paragraphs
+            formatted = formatted.replace(/<p[^>]*><\/p>/g, '');
+            
+            // Clean up multiple consecutive <br> tags
+            formatted = formatted.replace(/(<br>\s*){3,}/g, '<br><br>');
+
+            return formatted;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Scroll to bottom of chat
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Initialize chat với database information
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra và hiển thị thông tin database
+            if (trashClassificationData) {
+                console.log('✅ Database tích hợp thành công!');
+                console.log('📊 Thống kê:', {
+                    categories: Object.keys(trashClassificationData.trashCategories).length,
+                    totalExamples: Object.values(trashClassificationData.trashCategories)
+                        .reduce((sum, cat) => sum + (cat.examples?.length || 0), 0),
+                    vietnamRecyclingRate: trashClassificationData.statistics.vietnam.recyclingRate,
+                    globalWaste: trashClassificationData.statistics.global.totalWaste
+                });
+                
+                // Cập nhật welcome message
+                updateWelcomeMessage();
+            } else {
+                console.error('❌ Không thể tải database!');
+            }
+           
+            // Focus on input
+            messageInput.focus();
+        });
+    </script>
+</body>
+</html>

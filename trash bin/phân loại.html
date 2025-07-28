@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phân loại rác</title>
+     <!-- Import Google Font - Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Import Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.8.6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.3/dist/teachablemachine-image.min.js"></script>  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+    :root {
+      --primary-color: #1b5e20;
+      --primary-light: #4c8c4a;
+      --primary-dark: #003300;
+      --accent-color: #81c784;
+      --text-color: #2e7d32;
+      --background-light: #e0f7e9;
+      --background-dark: #c8e6c9;
+      --card-background: #ffffff;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      --border-radius: 12px;
+      --spacing: 20px;
+    }
+      /* Removed navbar style */
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to bottom, var(--background-light), var(--background-dark));
+      color: var(--text-color);
+      line-height: 1.6;
+      padding: var(--spacing);
+      min-height: 100vh;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing);
+    }
+
+    /* Header styles */
+    .app-header {
+      text-align: center;
+      margin-bottom: var(--spacing);
+    }
+
+    .app-header h1 {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      animation: slideInFromTop 1.2s ease-out;
+    }
+
+    .app-header p {
+      font-size: 1.2rem;
+      color: var(--text-color);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Card layout system */
+    .card-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing);
+      justify-content: center;
+      margin-top: var(--spacing);
+    }
+
+    .card {
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: var(--spacing);
+      flex: 1 1 400px;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .card-header {
+      width: 100%;
+      margin-bottom: 15px;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 10px;
+    }
+
+    .card-header h2 {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-body {
+      width: 100%;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Camera/Video styles */
+    .video-container {
+      width: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--spacing);
+    }
+
+    video, canvas {
+      max-width: 100%;
+      height: auto;
+      border: 2px solid var(--primary-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* Button styles */
+    .btn {
+      padding: 12px 25px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background-color: var(--primary-color);
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 5px;
+    }
+
+    .btn-upload {
+      background-color: #ff6b35;
+    }
+
+    .btn-upload:hover {
+      background-color: #e55a2b;
+      transform: translateY(-2px);
+    }
+
+    /* File upload styles */
+    .upload-container {
+      width: 100%;
+      margin-bottom: var(--spacing);
+      text-align: center;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .file-input {
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+    }
+
+    .image-preview {
+      max-width: 100%;
+      max-height: 400px;
+      border: 2px solid var(--primary-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin: 15px 0;
+      display: none;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--accent-color);
+      border-radius: var(--border-radius);
+      padding: 40px 20px;
+      background-color: rgba(129, 199, 132, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin: 15px 0;
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(129, 199, 132, 0.2);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary-color);
+      background-color: rgba(129, 199, 132, 0.3);
+      transform: scale(1.02);
+    }
+
+    .upload-text {
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .upload-hint {
+      color: var(--text-color);
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .current-mode {
+      background-color: #4caf50;
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: white;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn i {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+    }
+
+    /* Result display */
+    .result-container {
+      margin-top: var(--spacing);
+      padding: 15px;
+      border: 2px solid var(--accent-color);
+      border-radius: var(--border-radius);
+      background-color: rgba(255, 255, 255, 0.7);
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .result-container:hover {
+      transform: scale(1.02);
+    }
+
+    #result {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* Animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInFromTop {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive design adjustments */
+    @media (max-width: 768px) {
+      .card {
+        flex: 1 1 100%;
+      }
+
+      .app-header h1 {
+        font-size: 2rem;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .video-container {
+        height: auto;
+      }
+
+      video, canvas {
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --spacing: 15px;
+      }
+
+      .app-header h1 {
+        font-size: 1.8rem;
+      }
+
+      .card {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- App Header -->    
+    <header class="app-header">      
+      <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+        <h1><i class="fas fa-recycle"></i> Phân loại rác thông minh</h1>
+      </div>
+      <p>Sử dụng trí tuệ nhân tạo để nhận diện và phân loại rác thải từ <strong>Camera</strong> hoặc <strong>Tải ảnh lên</strong> một cách chính xác</p>
+      <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-color);">
+        <i class="fas fa-image"></i> <strong>Hỗ trợ định dạng:</strong> JPG, JPEG, PNG, GIF, BMP, WEBP, TIFF 
+        • <i class="fas fa-weight-hanging"></i> <strong>Tối đa:</strong> 10MB
+      </div>
+    </header>
+      <!-- Main Content Cards -->
+    <div class="card-wrapper">
+      <!-- Camera/Upload Card -->
+      <section class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-camera"></i> Nhận diện rác thải</h2>
+        </div>
+        <div class="card-body">
+          <!-- Mode indicator -->
+          <div id="current-mode" class="current-mode">
+            <i class="fas fa-camera"></i> Chế độ: Camera
+          </div>
+
+          <!-- Camera Section -->
+          <div id="camera-section" class="video-container">
+            <video id="webcam" autoplay playsinline></video>
+          </div>
+
+          <!-- Upload Section -->
+          <div id="upload-section" class="upload-container" style="display: none;">
+            <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+              <div class="upload-text">
+                <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                <div>Nhấp để chọn ảnh hoặc kéo thả file vào đây</div>
+              </div>
+              <div class="upload-hint">
+                Hỗ trợ: JPG, JPEG, PNG, GIF, BMP, WEBP, TIFF (Tối đa 10MB)
+              </div>
+            </div>
+            <input type="file" id="file-input" class="file-input" accept="image/*" multiple>
+            <img id="image-preview" class="image-preview" alt="Preview">
+          </div>
+
+          <!-- Control buttons -->
+          <div class="button-group">
+            <button class="btn" id="camera-mode-btn" onclick="switchToCamera()">
+              <i class="fas fa-camera"></i> Camera
+            </button>
+            <button class="btn btn-upload" id="upload-mode-btn" onclick="switchToUpload()">
+              <i class="fas fa-image"></i> Tải ảnh lên
+            </button>
+            <button class="btn btn-primary" onclick="predictWaste()">
+              <i class="fas fa-magnifying-glass"></i> Phân loại rác
+            </button>
+            <button class="btn" onclick="clearResults()" style="background-color: #757575;">
+              <i class="fas fa-eraser"></i> Xóa kết quả
+            </button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Results Card -->
+      <section class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-chart-simple"></i> Kết quả phân tích</h2>
+        </div>
+        <div class="card-body">
+          <div class="result-container">
+            <div id="result">
+              <i class="fas fa-circle-info"></i> Chưa có kết quả, vui lòng nhấn nút phân loại
+            </div>
+          </div>
+          <div id="waste-info" class="result-container" style="margin-top: 20px; display: none;">
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Hướng dẫn xử lý</h3>
+            <div id="waste-guidelines"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+    
+    <!-- Phần quy tắc phân loại rác -->
+    <div class="card-wrapper" style="margin-top: 30px;">
+      <section class="card" style="max-width: 100%;">
+        <div class="card-header">
+          <h2><i class="fas fa-book"></i> Quy tắc phân loại rác</h2>
+        </div>
+        <div class="card-body">
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            <!-- Thùng rác màu xanh lá -->
+            <div style="flex: 1; min-width: 280px; background-color: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 5px solid #2e7d32;">
+              <h3 style="color: #2e7d32; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-trash" style="color: #2e7d32;"></i> Thùng rác màu XANH LÁ
+              </h3>
+              <p style="margin: 10px 0;">Dùng để chứa <strong>rác hữu cơ</strong>, có khả năng phân hủy sinh học.</p>
+              <ul style="padding-left: 20px; text-align: left;">
+                <li>Thức ăn thừa</li>
+                <li>Vỏ trái cây, rau củ</li>
+                <li>Lá cây, cỏ</li>
+                <li>Bã cà phê, bã trà</li>
+                <li>Vỏ trứng</li>
+              </ul>
+            </div>
+            
+            <!-- Thùng rác màu vàng -->
+            <div style="flex: 1; min-width: 280px; background-color: #FFF8E1; padding: 15px; border-radius: 10px; border-left: 5px solid #F9A825;">
+              <h3 style="color: #F9A825; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-trash" style="color: #F9A825;"></i> Thùng rác màu VÀNG
+              </h3>
+              <p style="margin: 10px 0;">Dùng để chứa <strong>rác tái chế</strong> và các loại rác thải khác.</p>
+              <ul style="padding-left: 20px; text-align: left;">
+                <li>Chai nhựa, hộp nhựa</li>
+                <li>Lon kim loại, đồ hộp</li>
+                <li>Giấy, bìa carton</li>
+                <li>Thủy tinh, chai lọ</li>
+                <li>Vải, quần áo cũ</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px; background-color: #EDE7F6; padding: 15px; border-radius: 10px; text-align: left;">
+            <h3 style="color: #5E35B1; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-lightbulb"></i> Lưu ý khi phân loại rác
+            </h3>
+            <ul style="padding-left: 20px;">
+              <li>Rửa sạch rác trước khi phân loại</li>
+              <li>Tách riêng các loại vật liệu khác nhau</li>
+              <li>Bỏ nắp chai nhựa riêng</li>
+              <li>Tái sử dụng túi nhựa khi có thể</li>
+              <li>Không vứt rác thải nguy hại lẫn với rác thông thường</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    let model, webcam, labelContainer, maxPredictions;
+    let currentMode = 'camera'; // 'camera' hoặc 'upload'
+    let uploadedImage = null;
+
+    const URL = "tm-my-image-model/"; // Đặt thư mục chứa model.json, metadata.json, weights.bin ở đây
+
+    // Supported image formats
+    const supportedFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp', 'image/tiff'];
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+    async function init() {
+      try {
+        // Hiển thị trạng thái khởi tạo
+        document.getElementById("result").innerHTML = `
+          <i class="fas fa-spinner fa-spin"></i> Đang khởi tạo hệ thống...
+        `;
+        
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        // Tải model AI
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Khởi tạo webcam với kích thước linh hoạt hơn
+        webcam = new tmImage.Webcam(480, 360, true); // Kích thước lớn hơn cho chất lượng tốt hơn
+        await webcam.setup();
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        // Thay thế phần tử video bằng canvas và thêm class để styling
+        const webcamCanvas = webcam.canvas;
+        webcamCanvas.classList.add("webcam-canvas");
+        document.getElementById("webcam").replaceWith(webcamCanvas);
+        
+        // Setup file upload events
+        setupFileUpload();
+        
+        // Cập nhật trạng thái sau khi khởi tạo thành công
+        document.getElementById("result").innerHTML = `
+          <i class="fas fa-circle-info"></i> Hệ thống đã sẵn sàng, hãy nhấn nút phân loại
+        `;
+      } catch (error) {
+        console.error("Error initializing the model or webcam:", error);
+        document.getElementById("result").innerHTML = `
+          <i class="fas fa-circle-exclamation"></i> Lỗi: Không thể khởi tạo mô hình hoặc webcam.
+          <div style="font-size: 0.9rem; margin-top: 8px; color: #d32f2f;">${error.message}</div>
+        `;
+      }
+    }
+
+    function setupFileUpload() {
+      const fileInput = document.getElementById('file-input');
+      const uploadArea = document.getElementById('upload-area');
+      const imagePreview = document.getElementById('image-preview');
+
+      // File input change event
+      fileInput.addEventListener('change', handleFileSelect);
+
+      // Drag and drop events
+      uploadArea.addEventListener('dragenter', handleDragEnter);
+      uploadArea.addEventListener('dragover', handleDragOver);
+      uploadArea.addEventListener('dragleave', handleDragLeave);
+      uploadArea.addEventListener('drop', handleFileDrop);
+
+      function handleFileSelect(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+          processFile(files[0]);
+        }
+      }
+
+      function handleDragEnter(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      }
+
+      function handleDragOver(e) {
+        e.preventDefault();
+      }
+
+      function handleDragLeave(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+      }
+
+      function handleFileDrop(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          processFile(files[0]);
+        }
+      }
+
+      function processFile(file) {
+        // Validate file type
+        if (!supportedFormats.includes(file.type)) {
+          showError(`Định dạng file không được hỗ trợ. Vui lòng chọn: ${supportedFormats.map(f => f.split('/')[1].toUpperCase()).join(', ')}`);
+          return;
+        }
+
+        // Validate file size
+        if (file.size > maxFileSize) {
+          showError(`File quá lớn. Vui lòng chọn file nhỏ hơn ${maxFileSize / (1024*1024)}MB`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImage = new Image();
+          uploadedImage.onload = function() {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+            
+            // Update result
+            document.getElementById("result").innerHTML = `
+              <i class="fas fa-check-circle" style="color: #4caf50;"></i> Ảnh đã được tải lên thành công
+              <div style="font-size: 0.9rem; margin-top: 8px;">File: ${file.name} (${(file.size/1024).toFixed(1)} KB)</div>
+            `;
+          };
+          uploadedImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function showError(message) {
+        document.getElementById("result").innerHTML = `
+          <i class="fas fa-exclamation-triangle" style="color: #f44336;"></i> ${message}
+        `;
+      }
+    }
+
+    function switchToCamera() {
+      currentMode = 'camera';
+      document.getElementById('camera-section').style.display = 'block';
+      document.getElementById('upload-section').style.display = 'none';
+      document.getElementById('current-mode').innerHTML = '<i class="fas fa-camera"></i> Chế độ: Camera';
+      
+      // Reset buttons
+      document.getElementById('camera-mode-btn').style.backgroundColor = 'var(--primary-color)';
+      document.getElementById('upload-mode-btn').style.backgroundColor = '#ff6b35';
+      
+      document.getElementById("result").innerHTML = `
+        <i class="fas fa-circle-info"></i> Đã chuyển sang chế độ Camera
+      `;
+    }
+
+    function switchToUpload() {
+      currentMode = 'upload';
+      document.getElementById('camera-section').style.display = 'none';
+      document.getElementById('upload-section').style.display = 'block';
+      document.getElementById('current-mode').innerHTML = '<i class="fas fa-image"></i> Chế độ: Tải ảnh lên';
+      
+      // Reset buttons
+      document.getElementById('upload-mode-btn').style.backgroundColor = 'var(--primary-color)';
+      document.getElementById('camera-mode-btn').style.backgroundColor = '#1b5e20';
+      
+      document.getElementById("result").innerHTML = `
+        <i class="fas fa-circle-info"></i> Đã chuyển sang chế độ tải ảnh lên
+      `;
+    }
+
+    async function loop() {
+      if (webcam && currentMode === 'camera') {
+        webcam.update();
+      }
+      window.requestAnimationFrame(loop);
+    }
+
+    async function predictWaste() {
+      try {
+        // Hiển thị loading trong khi xử lý
+        document.getElementById("result").innerHTML = `
+          <i class="fas fa-spinner fa-spin"></i> Đang phân tích...
+        `;
+
+        let prediction;
+
+        if (currentMode === 'camera') {
+          // Predict from webcam
+          if (!webcam) {
+            throw new Error("Webcam chưa được khởi tạo");
+          }
+          prediction = await model.predict(webcam.canvas);
+        } else {
+          // Predict from uploaded image
+          if (!uploadedImage) {
+            document.getElementById("result").innerHTML = `
+              <i class="fas fa-exclamation-triangle"></i> Vui lòng chọn một ảnh để phân tích
+            `;
+            return;
+          }
+
+          // Create canvas for uploaded image
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Resize image to model input size while maintaining aspect ratio
+          const maxSize = 480;
+          let { width, height } = uploadedImage;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = height * (maxSize / width);
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = width * (maxSize / height);
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(uploadedImage, 0, 0, width, height);
+          
+          prediction = await model.predict(canvas);
+        }
+
+        // Log all predictions for debugging
+        console.log("Predictions:", prediction);
+
+        let highest = prediction[0];
+        for (let i = 1; i < prediction.length; i++) {
+          if (prediction[i].probability > highest.probability) {
+            highest = prediction[i];
+          }
+        }
+
+        // Map labels to more user-friendly names if needed
+        const labelMapping = {
+          "Organic Waste": "Rác hữu cơ",
+          "Recycle Waste": "Rác tái chế",
+          "Re": "Rác tái chế" // Thêm ánh xạ cho trường hợp "Re"
+        };        
+        
+        // Thông tin về cách xử lý mỗi loại rác
+        const wasteGuidelines = {
+          "Rác hữu cơ": `
+            <p><strong>Cách xử lý rác hữu cơ:</strong></p>
+            <ul style="text-align: left; padding-left: 20px;">
+              <li>Phân hủy tự nhiên thành phân compost</li>
+              <li><span style="color: #2e7d32; font-weight: bold;">Đặt vào thùng rác màu XANH LÁ</span></li>
+              <li>Có thể tái sử dụng làm phân bón cho cây trồng</li>
+              <li>Thời gian phân hủy ngắn, thân thiện với môi trường</li>
+            </ul>
+            <p style="margin-top: 10px; background-color: #e8f5e9; padding: 8px; border-radius: 5px; border-left: 4px solid #2e7d32;">
+              <i class="fas fa-info-circle"></i> Rác hữu cơ bao gồm: thức ăn thừa, vỏ trái cây, rau củ quả, lá cây...
+            </p>
+          `,
+          "Rác tái chế": `
+            <p><strong>Cách xử lý rác tái chế:</strong></p>
+            <ul style="text-align: left; padding-left: 20px;">
+              <li>Phân loại theo vật liệu: nhựa, kim loại, giấy, v.v.</li>
+              <li><span style="color: #F9A825; font-weight: bold;">Đặt vào thùng rác màu VÀNG</span></li>
+              <li>Làm sạch trước khi tái chế</li>
+              <li>Có thể được tái chế thành sản phẩm mới</li>
+            </ul>
+            <p style="margin-top: 10px; background-color: #FFF8E1; padding: 8px; border-radius: 5px; border-left: 4px solid #F9A825;">
+              <i class="fas fa-info-circle"></i> Rác tái chế bao gồm: chai nhựa, lon kim loại, hộp giấy, thủy tinh...
+            </p>
+          `
+        };        
+
+        const resultLabel = labelMapping[highest.className.trim()] || highest.className.trim();
+        const confidence = Math.round(highest.probability * 100);
+        
+        // Hiển thị kết quả với icon phù hợp và độ chính xác
+        let resultIcon, trashColor, colorStyle, colorName;
+        
+        if (resultLabel === "Rác hữu cơ") {
+          resultIcon = "fa-leaf";
+          trashColor = "#2e7d32"; // Màu xanh lá
+          colorStyle = "background-color: #e8f5e9; border-color: #2e7d32;";
+          colorName = "XANH LÁ";
+        } else {
+          resultIcon = "fa-recycle";
+          trashColor = "#F9A825"; // Màu vàng
+          colorStyle = "background-color: #FFF8E1; border-color: #F9A825;";
+          colorName = "VÀNG";
+        }
+        
+        const modeText = currentMode === 'camera' ? 'Camera' : 'Ảnh tải lên';
+        
+        document.getElementById("result").innerHTML = `
+          <i class="fas ${resultIcon}" style="color: ${trashColor};"></i> 
+          Kết quả: <strong>${resultLabel}</strong>
+          <div style="font-size: 0.9rem; margin-top: 8px;">
+            Nguồn: ${modeText} • Độ chính xác: ${confidence}%
+          </div>
+          <div style="margin-top: 12px; padding: 8px; border-radius: 5px; border: 2px solid ${trashColor}; ${colorStyle}">
+            <i class="fas fa-trash"></i> Vui lòng bỏ vào thùng rác màu <strong style="color: ${trashColor};">${colorName}</strong>
+          </div>
+        `;
+
+        // Hiển thị thông tin về cách xử lý loại rác
+        const wasteInfoElement = document.getElementById("waste-info");
+        const wasteGuidelinesElement = document.getElementById("waste-guidelines");
+        
+        if (wasteGuidelines[resultLabel]) {
+          wasteGuidelinesElement.innerHTML = wasteGuidelines[resultLabel];
+          wasteInfoElement.style.display = "block";
+        } else {
+          wasteInfoElement.style.display = "none";
+        }
+        
+        console.log(`Full result: ${resultLabel} (${confidence}%) from ${modeText}`);
+      } catch (error) {
+        console.error("Error during prediction:", error);
+        document.getElementById("result").innerHTML = `
+          <i class="fas fa-circle-exclamation"></i> Lỗi: Không thể thực hiện phân loại.
+          <div style="font-size: 0.9rem; margin-top: 8px; color: #d32f2f;">${error.message}</div>
+        `;
+        document.getElementById("waste-info").style.display = "none";
+      }
+    }
+
+    function clearResults() {
+      // Clear uploaded image
+      uploadedImage = null;
+      document.getElementById('image-preview').style.display = 'none';
+      document.getElementById('image-preview').src = '';
+      document.getElementById('file-input').value = '';
+      
+      // Clear results
+      document.getElementById("result").innerHTML = `
+        <i class="fas fa-circle-info"></i> Kết quả đã được xóa
+      `;
+      document.getElementById("waste-info").style.display = "none";
+      
+      // Reset upload area
+      document.getElementById('upload-area').classList.remove('dragover');
+    }
+
+    init();
+  </script>
+</body>
+</html>

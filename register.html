@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Green Eye</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #27ae60;
+            --primary-dark: #219150;
+            --primary-light: #a5f1c1;
+            --background: #f4f7fc;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body {
+            background: url('Environmental Protection Earth Green Simple Fresh Powerpoint Background For Free Download.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 0;
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .register-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .register-header { text-align: center; margin-bottom: 2rem; }
+        .register-header .logo { color: var(--primary-color); font-size: 2.5rem; margin-bottom: 1rem; }
+        .register-header h1 { font-size: 1.75rem; color: var(--text); margin-bottom: 0.5rem; }
+        .register-header p { color: #666; font-size: 0.9rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text); font-weight: 500; }
+        .input-group { position: relative; }
+        .input-group i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #666; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.1);
+            outline: none;
+        }
+        .terms { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 1.5rem; color: #666; font-size: 0.9rem; }
+        .terms input[type="checkbox"] { margin-top: 0.2rem; }
+        .terms a { color: var(--primary-color); text-decoration: none; }
+        .terms a:hover { text-decoration: underline; }
+        .submit-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+        .login-link { text-align: center; margin-top: 1.5rem; color: #666; font-size: 0.9rem; }
+        .login-link a { color: var(--primary-color); text-decoration: none; font-weight: 500; margin-left: 0.5rem; }
+        .login-link a:hover { text-decoration: underline; }
+        @media (max-width: 768px) {
+            .register-card { padding: 2rem; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="register-card">
+            <div class="register-header">
+                <div class="logo">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h1>Đăng ký tài khoản</h1>
+                <p>Tham gia cùng Green Eye để bảo vệ môi trường</p>
+            </div>
+            <form action="register.php" method="post" onsubmit="return handleRegisterSubmit(this)">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Họ tên</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="name" placeholder="Nhập họ tên" required>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" name="email" placeholder="Nhập địa chỉ email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password" placeholder="Nhập mật khẩu" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <div class="input-group">
+                            <i class="fas fa-phone"></i>
+                            <input type="text" name="phone" placeholder="Nhập số điện thoại" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày sinh</label>
+                        <div class="input-group">
+                            <i class="fas fa-calendar"></i>
+                            <input type="date" name="dob" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Vai trò</label>
+                        <div class="input-group">
+                            <i class="fas fa-users"></i>
+                            <select name="role" required style="padding-left:2.5rem;">
+                                <option value="nguoi_dung">Người dùng thường</option>
+                                <option value="cong_tac_vien">Cộng tác viên</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <label class="terms">
+                    <input type="checkbox" required>
+                    <span>Tôi đồng ý với 
+                        <a href="https://docs.google.com/document/d/1QwqEXAMPLE_TERMS" target="_blank" rel="noopener">Điều khoản sử dụng</a> 
+                        và 
+                        <a href="https://docs.google.com/document/d/1QwqEXAMPLE_POLICY" target="_blank" rel="noopener">Chính sách bảo mật</a> 
+                        của Green Eye
+                    </span>
+                </label>
+                <button type="submit" class="submit-btn">Đăng ký</button>
+            </form>
+            <p class="login-link">
+                Đã có tài khoản?
+                <a href="login.html">Đăng nhập</a>
+            </p>
+        </div>
+    </div>
+    <script>
+function handleRegisterSubmit(form) {
+    form.querySelector('.submit-btn').disabled = true;
+    form.querySelector('.submit-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đăng ký...';
+    // Cho phép submit, chuyển hướng sẽ xử lý ở register.php
+    return true;
+}
+</script>
+</body>
+</html>

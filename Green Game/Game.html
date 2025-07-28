@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trò chơi phân loại rác</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">  <style>
+    body {
+      font-family: 'Nunito', 'Poppins', Arial, sans-serif;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath fill='%2343a047' fill-opacity='0.05' d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'%3E%3C/path%3E%3C/svg%3E"),
+        linear-gradient(135deg, #e8f5e9 0%, #fffde7 100%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+    
+    /* Hiệu ứng confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      border-radius: 50%;
+      animation: fall linear forwards;
+      z-index: 100;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(105vh) rotate(720deg);
+      }
+    }
+    
+    /* Hiệu ứng rung khi sai */
+    .shake {
+      animation: shake 0.5s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+    h1 {
+      color: #1b5e20;
+      margin-top: 32px;
+      margin-bottom: 8px;
+      font-size: 2.2rem;
+      text-align: center;
+      text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+      font-family: 'Nunito', 'Poppins', Arial, sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .desc {
+      color: #388e3c;
+      margin-bottom: 24px;
+      text-align: center;
+      background: rgba(255,255,255,0.7);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .trash-list {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }    .trash-item {
+      width: 85px;
+      height: 85px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      cursor: grab;
+      border: 2px solid #c8e6c9;
+      transition: all 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      transform: translateY(0);
+      position: relative;
+    }
+    .trash-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(76,175,80,0.15);
+      border-color: #81c784;
+    }
+    .trash-item.dragging {
+      opacity: 0.5;
+      box-shadow: 0 4px 16px rgba(76,175,80,0.2);
+      transform: scale(0.95);
+    }
+    .trash-label {
+      font-size: 0.95rem;
+      color: #388e3c;
+      margin-top: 4px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .bins {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }    .bin {
+      width: 130px;
+      height: 180px;
+      background: linear-gradient(to bottom, #f5f9f2, #f1f8e9);
+      border-radius: 20px 20px 35px 35px;
+      border: 3px solid #a5d6a7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      transition: transform 0.3s, border 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .bin:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(to right, #81c784, #a5d6a7);
+      z-index: 1;
+    }
+    .bin:hover {
+      transform: translateY(-5px);
+    }
+    .bin.over {
+      border: 3px solid #388e3c;
+      box-shadow: 0 0 0 4px #c8e6c9, 0 15px 30px rgba(76,175,80,0.2);
+      transform: scale(1.05);
+    }
+    .bin-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      margin-top: 16px;
+      filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+      transition: transform 0.3s;
+    }
+    .bin:hover .bin-icon {
+      transform: scale(1.1);
+    }
+    .bin-label {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2e7d32;
+      margin-bottom: 16px;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
+    }
+    .bin[data-type="organic"] .bin-icon {
+      color: #43a047;
+    }
+    .bin[data-type="recycle"] .bin-icon {
+      color: #fbc02d;
+    }
+    .bin[data-type="other"] .bin-icon {
+      color: #757575;
+    }    .score-area {
+      margin: 18px 0 20px 0;
+      font-size: 1.3rem;
+      color: #1b5e20;
+      font-weight: 700;
+      text-align: center;
+      background: rgba(255,255,255,0.8);
+      padding: 10px 25px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      position: relative;
+      border: 2px solid #a5d6a7;
+    }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ffd54f 0%, #ffecb3 100%);
+      color: #e65100;
+      border-radius: 50px;
+      padding: 12px 28px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 18px;
+      box-shadow: 0 5px 15px rgba(255,193,7,0.2);
+      animation: pop 0.8s;
+      border: 2px dashed #ffa000;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+      position: relative;
+    }
+    .badge:after {
+      content: '✨';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      font-size: 1.5rem;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+      60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+      75% { transform: scale(0.95) rotate(0deg); }
+      100% { transform: scale(1); }
+    }
+    .reset-btn {
+      margin-top: 24px;
+      background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #2e7d32, 0 6px 15px rgba(0,0,0,0.15);
+      transition: all 0.2s;
+      position: relative;
+      top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reset-btn i {
+      font-size: 1.2rem;
+    }
+    .reset-btn:hover {
+      background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #2e7d32, 0 8px 20px rgba(0,0,0,0.19);
+    }
+    .reset-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #2e7d32, 0 3px 6px rgba(0,0,0,0.1);
+    }
+    .home-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    
+    .home-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .home-tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      left: 60px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .home-btn:hover .home-tooltip {
+      opacity: 1;
+    }
+    @media (max-width: 600px) {
+      .bins { flex-direction: column; gap: 18px; }
+      .game-area { max-width: 98vw; }
+      .trash-list { gap: 10px; }
+      .bin { width: 90vw; max-width: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="home-btn">
+    <i class="fas fa-home"></i>
+    <span class="home-tooltip">Quay về trang chủ</span>
+  </a>
+  
+  <h1>Trò chơi phân loại rác</h1>
+  <div class="desc">Kéo các loại rác vào đúng thùng. Đúng sẽ được cộng điểm và nhận huy hiệu!</div>  <div class="game-area">
+    <div class="score-area" id="scoreArea">Điểm: 0</div>
+    <div class="trash-list" id="trashList"></div>
+    <div class="bins">
+      <div class="bin" data-type="organic">
+        <div class="bin-icon"><i class="fas fa-leaf"></i></div>
+        <div class="bin-label">Hữu cơ</div>
+      </div>
+      <div class="bin" data-type="recycle">
+        <div class="bin-icon"><i class="fas fa-recycle"></i></div>
+        <div class="bin-label">Tái chế</div>
+      </div>
+      <div class="bin" data-type="other">
+        <div class="bin-icon"><i class="fas fa-trash"></i></div>
+        <div class="bin-label">Khác</div>
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetGame()"><i class="fas fa-redo-alt"></i> Chơi lại</button>
+    <div id="badgeArea"></div>
+  </div>  <script>
+    // Danh sách rác cơ bản
+    const trashData = [
+      { name: 'Vỏ chuối', icon: '🍌', type: 'organic' },
+      { name: 'Vỏ táo', icon: '🍎', type: 'organic' },
+      { name: 'Lá cây', icon: '🍃', type: 'organic' },
+      { name: 'Vỏ trứng', icon: '🥚', type: 'organic' },
+      { name: 'Chai nhựa', icon: '🧴', type: 'recycle' },
+      { name: 'Giấy', icon: '📄', type: 'recycle' },
+      { name: 'Lon nước', icon: '🥤', type: 'recycle' },
+      { name: 'Hộp giấy', icon: '📦', type: 'recycle' },
+      { name: 'Pin cũ', icon: '🔋', type: 'other' },
+      { name: 'Bóng đèn', icon: '💡', type: 'other' },
+      { name: 'Túi nilon', icon: '🛍️', type: 'other' }
+    ];
+    let score = 0;
+    let currentTrash = [];
+    let badgeShown = false;
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function renderTrash() {
+      const trashList = document.getElementById('trashList');
+      trashList.innerHTML = '';
+      currentTrash.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'trash-item';
+        div.draggable = true;
+        div.innerHTML = `<div>${item.icon}</div><div class="trash-label">${item.name}</div>`;
+        div.dataset.type = item.type;
+        div.dataset.idx = idx;
+        div.addEventListener('dragstart', dragStart);
+        div.addEventListener('dragend', dragEnd);
+        trashList.appendChild(div);
+      });
+    }
+
+    function dragStart(e) {
+      e.dataTransfer.setData('text/plain', e.target.dataset.idx);
+      e.target.classList.add('dragging');
+    }
+    function dragEnd(e) {
+      e.target.classList.remove('dragging');
+    }
+
+    document.querySelectorAll('.bin').forEach(bin => {
+      bin.addEventListener('dragover', e => {
+        e.preventDefault();
+        bin.classList.add('over');
+      });
+      bin.addEventListener('dragleave', () => bin.classList.remove('over'));
+      bin.addEventListener('drop', e => {
+        e.preventDefault();
+        bin.classList.remove('over');
+        const idx = e.dataTransfer.getData('text/plain');
+        handleDrop(idx, bin.dataset.type);
+      });
+    });    function handleDrop(idx, binType) {
+      const item = currentTrash[idx];
+      if (!item) return;
+      
+      if (item.type === binType) {
+        score++;
+        showBadge(score);
+        showFeedback('Đúng rồi! 👍', true);
+        playSound('success');
+        
+        // Hiệu ứng cho thùng rác
+        const bin = document.querySelector(`.bin[data-type="${binType}"]`);
+        bin.classList.add('correct-bin');
+        setTimeout(() => bin.classList.remove('correct-bin'), 700);
+      } else {
+        showFeedback('Sai rồi! 😅', false);
+        playSound('error');
+      }
+      
+      // Xóa rác đã kéo
+      currentTrash.splice(idx, 1);
+      renderTrash();
+      updateScore();
+      
+      // Nếu hết rác, đợi chút để người chơi thấy kết quả rồi reset game
+      if (currentTrash.length === 0) {
+        setTimeout(() => {
+          const endMessage = document.createElement('div');
+          endMessage.className = 'end-message';
+          endMessage.innerHTML = `<div>Làm tốt lắm! Bạn đã phân loại tất cả.</div><div>Điểm số: ${score}</div>`;
+          document.body.appendChild(endMessage);
+          
+          setTimeout(() => {
+            endMessage.remove();
+            resetGame();
+          }, 2000);
+        }, 1200);
+      }
+    }function showFeedback(msg, isCorrect) {
+      const area = document.getElementById('scoreArea');
+      
+      // Tạo hiệu ứng
+      if (isCorrect) {
+        // Thêm hiệu ứng confetti cho câu trả lời đúng
+        createConfetti();
+      }
+      
+      area.innerHTML = `Điểm: ${score} <span style="color: ${isCorrect ? '#4caf50' : '#d32f2f'}; font-weight: bold;">${msg}</span>`;
+      
+      // Hiệu ứng rung nếu sai
+      if (!isCorrect) {
+        area.classList.add('shake');
+        setTimeout(() => {
+          area.classList.remove('shake');
+        }, 500);
+      }
+      
+      setTimeout(() => {
+        area.innerHTML = `Điểm: ${score}`;
+      }, 1500);
+    }
+    
+    // Tạo hiệu ứng confetti đơn giản
+    function createConfetti() {
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = ['#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107'][Math.floor(Math.random() * 5)];
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
+    }
+
+    function updateScore() {
+      document.getElementById('scoreArea').innerHTML = `Điểm: ${score}`;
+    }    function showBadge(score) {
+      const badgeArea = document.getElementById('badgeArea');
+      if (score === 3 && !badgeShown) {
+        badgeArea.innerHTML = '<div class="badge">🥉 Huy hiệu Đồng: Khởi động tuyệt vời!</div>';
+        badgeShown = true;
+        playSound('success');
+      } else if (score === 6) {
+        badgeArea.innerHTML = '<div class="badge">🥈 Huy hiệu Bạc: Bạn rất giỏi!</div>';
+        playSound('success');
+      } else if (score === 9) {
+        badgeArea.innerHTML = '<div class="badge">🥇 Huy hiệu Vàng: Siêu phân loại!</div>';
+        playSound('success');
+        setTimeout(() => {
+          createConfetti(); // Hiệu ứng đặc biệt khi đạt huy chương vàng
+        }, 300);
+      }
+    }
+    
+    // Thêm âm thanh đơn giản
+    function playSound(type) {
+      const audio = new Audio();
+      if (type === 'success') {
+        audio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFzZXJQaXN0b2xzLmNvbQBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAADIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+      } else {
+        audio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFzZXJQaXN0b2xzLmNvbQBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAADIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+      }
+      audio.play().catch(e => console.log('Audio play failed:', e));
+    }
+
+    function resetGame() {
+      score = 0;
+      badgeShown = false;
+      document.getElementById('badgeArea').innerHTML = '';
+      currentTrash = shuffle(trashData.slice());
+      renderTrash();
+      updateScore();
+    }
+
+    // Khởi động game
+    resetGame();
+  </script>
+</body>
+</html>
